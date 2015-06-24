@@ -15,9 +15,16 @@ set -e
   set -x
 }
 
-list_definitions() {
+list_node_definitions() {
   { curl -s "http://nodejs.org/dist/" | \
     awk 'match($0,/>(v[0-9]+\.[0-9]+\.[0-9]+)\/</) { print substr($0, RSTART + 1, RLENGTH - 3); }' -
+  } | sort_versions | uniq
+}
+
+list_iojs_definitions() {
+  {
+    curl -s -f https://iojs.org/dist/index.tab | \
+    awk 'NR>=2{print "iojs-" $1}' -
   } | sort_versions | uniq
 }
 
@@ -27,7 +34,7 @@ sort_versions() {
 
 # Provide nodenv completions
 if [ "$1" = "--complete" ]; then
-  list_definitions
+  list_node_definitions && list_iojs_definitions
   exit 0
 fi
 
