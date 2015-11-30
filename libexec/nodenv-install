@@ -21,27 +21,14 @@ list_node_definitions() {
   } | sort_versions | uniq
 }
 
-list_iojs_definitions() {
-  {
-    curl -s -f https://iojs.org/dist/index.tab | \
-    awk 'NR>=2{print "iojs-" $1}' -
-  } | sort_versions | uniq
-}
-
 sort_versions() {
   LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n
 }
 
 # Provide nodenv completions
 if [ "$1" = "--complete" ]; then
-  list_node_definitions && list_iojs_definitions
+  list_node_definitions
   exit 0
-fi
-
-# Sugar for install latest version of iojs
-if [[ $1 == iojs ]]; then
-  iolatest=$(curl -s -f https://iojs.org/dist/index.tab | head -n 2 | awk 'NR==2{print $1}')
-  set -- "iojs-$iolatest" "${@:2}"
 fi
 
 # Pull the desired version out of ARGV
@@ -60,17 +47,9 @@ cd "$version_dir"
 
 if [ "$compile" = "--source" ]; then
   # Let's fetch the source and build it
-  if [[ $1 == iojs-* ]]; then
-    ioversion=${1##*-}
-    work_dir="/tmp/iojs-$ioversion"
-    download="https://iojs.org/dist/${ioversion}/iojs-${ioversion}.tar.gz"
-    # There is no tarballs at alternatives places on io.js project, so try again!
-    alt_download="https://iojs.org/dist/${ioversion}/iojs-${ioversion}.tar.gz"
-  else
-    download="http://nodejs.org/dist/${version}/node-${version}.tar.gz"
-    alt_download="http://nodejs.org/dist/node-${version}.tar.gz"
-    work_dir="/tmp/node-$version"
-  fi
+  download="http://nodejs.org/dist/${version}/node-${version}.tar.gz"
+  alt_download="http://nodejs.org/dist/node-${version}.tar.gz"
+  work_dir="/tmp/node-$version"
 
   # Can't get too clever here
   set +e
@@ -101,12 +80,7 @@ else
   fi
 
   # URL to download from
-  if [[ $1 == iojs-* ]];then
-    ioversion=${1##*-}
-    download="https://iojs.org/dist/${ioversion}/iojs-${ioversion}-${platform}-${arch}.tar.gz"
-  else
-    download="http://nodejs.org/dist/${version}/node-${version}-${platform}-${arch}.tar.gz"
-  fi
+  download="http://nodejs.org/dist/${version}/node-${version}-${platform}-${arch}.tar.gz"
 
   # Can't get too clever here
   set +e
