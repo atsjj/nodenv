@@ -13,6 +13,12 @@ set -e
   set -x
 }
 
+# Provide nodenv completions
+if [ "$1" = "--complete" ]; then
+  nodenv-versions
+  exit 0
+fi
+
 # Pull the desired version out of ARGV
 version="$1"
 version_dir="$NODENV_ROOT/versions/$version"
