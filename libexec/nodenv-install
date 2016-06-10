@@ -32,7 +32,18 @@ if [ "$1" = "--complete" ]; then
 fi
 
 # Pull the desired version out of ARGV
-version="$1"
+if [ -z "$1" ]; then
+  if [ -f "$(pwd)/.node-version" ]; then
+    version_file="$(nodenv-version-file)"
+    version="$(nodenv-version-file-read "$version_file" || true)"
+  else
+    echo "nodenv: a version must be specified as an argument or in a .node-version file." >&2
+    exit 1
+  fi
+else
+  version="$1"
+fi
+
 version_dir="$NODENV_ROOT/versions/$version"
 
 # stash the pwd
